@@ -117,10 +117,14 @@ class IrcThread(threading.Thread):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.config = config
-        
+
+        self.branch_ignore = []
         self.branch_colors = {}
         for name, value in config.items(BRANCHES):
-            self.branch_colors[name] = color(globals()[value])
+            if value == "IGNORE":
+                self.branch_ignore.append(name)
+            else:
+                self.branch_colors[name] = color(globals()[value])
 
     def run(self):
         host = self.config.get(IRC, "host")
@@ -156,6 +160,8 @@ class IrcThread(threading.Thread):
         change = event["change"]
 
         branch = change["branch"]
+        if branch in self.branch_ignore: pass
+
         project = re.compile(r'^platform/').sub("", change["project"])
         owner = re.compile(r'@.+').sub("", change["owner"]["email"])
         subject = change["subject"]
