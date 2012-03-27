@@ -160,7 +160,7 @@ class IrcThread(threading.Thread):
         change = event["change"]
 
         branch = change["branch"]
-        if branch in self.branch_ignore: pass
+        if branch in self.branch_ignore: return
 
         project = re.compile(r'^platform/').sub("", change["project"])
         owner = re.compile(r'@.+').sub("", change["owner"]["email"])
