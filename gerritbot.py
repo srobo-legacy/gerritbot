@@ -114,16 +114,28 @@ class GerritThread(threading.Thread):
         except Exception, e:
             print self, "unexpected", e
 
+def username_from_person(person):
+    username = re.compile(r'@.+').sub("", person["email"])
+    return username
+
+def project_from_change(change):
+    project = re.compile(r'^platform/').sub("", change["project"])
+    return project
+
+def link_from_change(change):
+    link = config.get(GENERAL, "shortlink") % (change["number"])
+    return link
+
 def change_merged(event):
     change = event["change"]
 
     branch = change["branch"]
     if branch in branch_ignore: return
 
-    project = re.compile(r'^platform/').sub("", change["project"])
-    owner = re.compile(r'@.+').sub("", change["owner"]["email"])
+    project = project_from_change(change)
+    owner = username_from_person(change["owner"])
     subject = change["subject"]
-    link = config.get(GENERAL, "shortlink") % (change["number"])
+    link = link_from_change(change)
 
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
@@ -145,10 +157,10 @@ def comment_added(event):
 
     author = event["author"]
 
-    project = re.compile(r'^platform/').sub("", change["project"])
-    author = re.compile(r'@.+').sub("", author["email"])
+    project = project_from_change(change)
+    author = username_from_person(author)
     subject = change["subject"]
-    link = config.get(GENERAL, "shortlink") % (change["number"])
+    link = link_from_change(change)
 
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
@@ -168,10 +180,10 @@ def patchset_created(event):
     branch = change["branch"]
     if branch in branch_ignore: return
 
-    project = re.compile(r'^platform/').sub("", change["project"])
-    owner = re.compile(r'@.+').sub("", change["owner"]["email"])
+    project = project_from_change(change)
+    owner = username_from_person(change["owner"])
     subject = change["subject"]
-    link = config.get(GENERAL, "shortlink") % (change["number"])
+    link = link_from_change(change)
 
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
