@@ -104,6 +104,8 @@ class GerritThread(threading.Thread):
                         comment_added(event)
                     elif event["type"] == "change-merged":
                         change_merged(event)
+                    elif event["type"] == "patchset-created":
+                        patchset_created(event)
                     else:
                         pass
                 except ValueError:
@@ -160,7 +162,7 @@ def comment_added(event):
     message = "%s reviewed %s | %s : %s %s" % (msg_author, msg_project, msg_branch, msg_subject, msg_link)
     subprocess.call(['./pipebot/say', message])
 
-def patch_created(event):
+def patchset_created(event):
     pass
 
 if __name__ == '__main__':
