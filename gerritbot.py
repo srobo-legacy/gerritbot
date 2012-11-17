@@ -76,6 +76,11 @@ def shorten_project(project):
     if len(middle) < 16: return project
     return "%s/../%s" % (first, last)
 
+def shorten_hash(full_hash):
+    if len(full_hash) < 6:
+        return full_hash
+    return full_hash[:6]
+
 def trigger(event):
     if event["type"] == "comment-added":
         comment_added(event)
@@ -83,6 +88,8 @@ def trigger(event):
         change_merged(event)
     elif event["type"] == "patchset-created":
         patchset_created(event)
+    elif event["type"] == "ref-updated":
+        ref_updated(event)
     else:
         pass
 
@@ -212,6 +219,28 @@ def patchset_created(event):
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
     message = "%s submitted %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
+    subprocess.call(['./pipebot/say', message])
+
+def ref_updated(event):
+    updated_ref = event["refUpdate"]
+
+    branch = updated_ref["refName"]
+    if branch in branch_ignore: return
+
+    to_hash = shorten_hash(updated_ref['newRev'])
+    from_hash = shorten_hash(updated_ref['oldRev'])
+
+    project = project_from_change(updated_ref)
+    submitter = username_from_person(event["submitter"])
+    link = "http://git.srobo.org/%s.git" % project
+
+    msg_project_branch = build_repo_branch(project, branch) + color()
+    msg_owner = color(GREEN) + submitter + color()
+    msg_old_ref = color(bold=True) + from_hash + color()
+    msg_new_ref = color(bold=True) + to_hash + color(GREY)
+    msg_link = color(NAVY, underline=True) + link + color()
+
+    message = "%s updated %s from %s to %s : %s" % (msg_owner, msg_project_branch, msg_old_ref, msg_new_ref, msg_link)
     subprocess.call(['./pipebot/say', message])
 
 if __name__ == '__main__':
