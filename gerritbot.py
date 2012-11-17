@@ -157,7 +157,7 @@ def change_merged(event):
 
     msg_branch = branch_color + branch + color(GREY)
     msg_project = color(TEAL,bold=True) + project + color(GREY)
-    msg_owner = color(GREEN) + owner + "'s" + color(BLACK)
+    msg_owner = color(GREEN) + owner + "'s" + color()
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
@@ -180,7 +180,7 @@ def comment_added(event):
     project = shorten_project(project)
     branch_color = get_branch_color(branch)
 
-    msg_author = color(GREEN) + author + color(BLACK)
+    msg_author = color(GREEN) + author + color()
     msg_project = color(TEAL,bold=True) + project + color(GREY)
     msg_branch = branch_color + branch + color(GREY)
     msg_subject = color() + subject + color(GREY)
@@ -204,9 +204,9 @@ def patchset_created(event):
     project = shorten_project(project)
     branch_color = get_branch_color(branch)
 
-    msg_owner = color(GREEN) + uploader + color(BLACK)
+    msg_owner = color(GREEN) + uploader + color()
     if uploader != owner:
-        msg_owner += ' (for ' + color(GREEN) + owner + color(BLACK) + ')'
+        msg_owner += ' (for ' + color(GREEN) + owner + color() + ')'
     msg_project = color(TEAL,bold=True) + project + color(GREY)
     msg_branch = branch_color + branch + color(GREY)
     msg_subject = color() + subject + color(GREY)
