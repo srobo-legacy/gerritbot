@@ -181,6 +181,7 @@ def patchset_created(event):
     if branch in branch_ignore: return
 
     project = project_from_change(change)
+    uploader = username_from_person(event["uploader"])
     owner = username_from_person(change["owner"])
     subject = change["subject"]
     link = link_from_change(change)
@@ -188,7 +189,9 @@ def patchset_created(event):
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
 
-    msg_owner = color(GREEN) + owner + color(BLACK)
+    msg_owner = color(GREEN) + uploader + color(BLACK)
+    if uploader != owner:
+        msg_owner += ' (for ' + color(GREEN) + owner + color(BLACK) + ')'
     msg_project = color(TEAL,bold=True) + project + color(GREY)
     msg_branch = branch_color + branch + color(GREY)
     msg_subject = color() + subject + color(GREY)
