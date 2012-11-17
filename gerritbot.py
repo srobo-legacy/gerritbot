@@ -121,7 +121,7 @@ def change_merged(event):
     project = re.compile(r'^platform/').sub("", change["project"])
     owner = re.compile(r'@.+').sub("", change["owner"]["email"])
     subject = change["subject"]
-    link = config.get(GENERAL, "shortlink") % (change["id"][:9])
+    link = config.get(GENERAL, "shortlink") % (change["number"])
 
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
