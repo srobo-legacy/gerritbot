@@ -138,11 +138,11 @@ def change_merged(event):
 def comment_added(event):
     pass
 
+if __name__ == '__main__':
+    gerrit = GerritThread(config); gerrit.start()
 
-gerrit = GerritThread(config); gerrit.start()
-
-while True:
-    try:
-        line = sys.stdin.readline()
-    except KeyboardInterrupt:
-        break
+    while True:
+        try:
+            line = sys.stdin.readline()
+        except KeyboardInterrupt:
+            break
