@@ -6,20 +6,21 @@ import sys
 
 import gerritbot
 
-if len(sys.argv) is not 2:
-    print "Usage: dev.py EVENT.json"
-    print "  Triggers the given event inside gerritbot"
+if len(sys.argv) < 2:
+    print "Usage: dev.py EVENT_FILE.json [EVENT_FILE.json ..]"
+    print "  Triggers the given events inside gerritbot"
     exit(1)
 
-filePath = sys.argv[1]
-if not os.path.exists(filePath):
-    print "File '%s' doesn't exist." % filePath
-    exit(1)
+paths = sys.argv[1:]
+for filePath in paths:
+    if not os.path.exists(filePath):
+        print "File '%s' doesn't exist." % filePath
+        continue
 
-event = None
-with open(filePath) as f:
-    event_data = f.read()
+    event = None
+    with open(filePath) as f:
+        event_data = f.read()
 
-event = simplejson.loads(event_data)
+    event = simplejson.loads(event_data)
 
-gerritbot.trigger(event)
+    gerritbot.trigger(event)
