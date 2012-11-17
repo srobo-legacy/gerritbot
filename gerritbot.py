@@ -136,7 +136,29 @@ def change_merged(event):
     subprocess.call(['./pipebot/say', message])
 
 def comment_added(event):
-    pass
+    change = event["change"]
+
+    branch = change["branch"]
+    if branch in branch_ignore: return
+
+    author = event["author"]
+
+    project = re.compile(r'^platform/').sub("", change["project"])
+    author = re.compile(r'@.+').sub("", author["email"])
+    subject = change["subject"]
+    link = config.get(GENERAL, "shortlink") % (change["number"])
+
+    project = shorten_project(project)
+    branch_color = branch_colors.get(branch, color(GREY))
+
+    msg_author = color(TEAL) + author + color(BLACK)
+    msg_project = color(TEAL,bold=True) + project + color(GREY)
+    msg_branch = branch_color + branch + color(GREY)
+    msg_subject = color() + subject + color(GREY)
+    msg_link = color(NAVY, underline=True) + link + color(GREY)
+
+    message = "%s reviewed %s | %s : %s %s" % (msg_author, msg_project, msg_branch, msg_subject, msg_link)
+    subprocess.call(['./pipebot/say', message])
 
 def patch_created(event):
     pass
