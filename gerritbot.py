@@ -129,6 +129,10 @@ def link_from_change(change):
     link = config.get(GENERAL, "shortlink") % (change["number"])
     return link
 
+def get_branch_color(branch):
+    branch_color = branch_colors.get(branch, color(GREY))
+    return branch_color
+
 def change_merged(event):
     change = event["change"]
 
@@ -141,7 +145,7 @@ def change_merged(event):
     link = link_from_change(change)
 
     project = shorten_project(project)
-    branch_color = branch_colors.get(branch, color(GREY))
+    branch_color = get_branch_color(branch)
 
     msg_branch = branch_color + branch + color(GREY)
     msg_project = color(TEAL,bold=True) + project + color(GREY)
@@ -166,7 +170,7 @@ def comment_added(event):
     link = link_from_change(change)
 
     project = shorten_project(project)
-    branch_color = branch_colors.get(branch, color(GREY))
+    branch_color = get_branch_color(branch)
 
     msg_author = color(GREEN) + author + color(BLACK)
     msg_project = color(TEAL,bold=True) + project + color(GREY)
@@ -190,7 +194,7 @@ def patchset_created(event):
     link = link_from_change(change)
 
     project = shorten_project(project)
-    branch_color = branch_colors.get(branch, color(GREY))
+    branch_color = get_branch_color(branch)
 
     msg_owner = color(GREEN) + uploader + color(BLACK)
     if uploader != owner:
