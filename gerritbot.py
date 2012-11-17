@@ -54,8 +54,16 @@ for name, value in config.items(BRANCHES):
     if value == "IGNORE":
         branch_ignore.append(name)
     else:
-        branch_colors[name] = color(globals()[value])
-
+        bold = False
+        underline = False
+        colour = value
+        if ':' in value:
+            colour, mods = value.split(':')
+            if 'BOLD' in mods:
+                bold = True
+            if 'UNDERLINE' in mods:
+                underline = True
+        branch_colors[name] = color(globals()[colour], bold=bold, underline=underline)
 
 
 def shorten_project(project):
@@ -130,7 +138,7 @@ def link_from_change(change):
     return link
 
 def get_branch_color(branch):
-    branch_color = branch_colors.get(branch, color(GREY))
+    branch_color = branch_colors.get(branch, color(NAVY))
     return branch_color
 
 def change_merged(event):
