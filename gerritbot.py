@@ -68,6 +68,16 @@ def shorten_project(project):
     if len(middle) < 16: return project
     return "%s/../%s" % (first, last)
 
+def trigger(event):
+    if event["type"] == "comment-added":
+        comment_added(event)
+    elif event["type"] == "change-merged":
+        change_merged(event)
+    elif event["type"] == "patchset-created":
+        patchset_created(event)
+    else:
+        pass
+
 class GerritThread(threading.Thread):
     def __init__(self, config):
         threading.Thread.__init__(self)
@@ -100,14 +110,7 @@ class GerritThread(threading.Thread):
                 print line
                 try:
                     event = simplejson.loads(line)
-                    if event["type"] == "comment-added":
-                        comment_added(event)
-                    elif event["type"] == "change-merged":
-                        change_merged(event)
-                    elif event["type"] == "patchset-created":
-                        patchset_created(event)
-                    else:
-                        pass
+                    trigger(event)
                 except ValueError:
                     pass
             client.close()
