@@ -48,6 +48,15 @@ def color(fg=None, bg=None, bold=False, underline=False):
     if underline: result += "\x1f"
     return result
 
+branch_colors = {}
+branch_ignore = []
+for name, value in config.items(BRANCHES):
+    if value == "IGNORE":
+        branch_ignore.append(name)
+    else:
+        branch_colors[name] = color(globals()[value])
+
+
 
 def shorten_project(project):
     # shorten long project names by omitting middle
@@ -59,14 +68,11 @@ def shorten_project(project):
     if len(middle) < 16: return project
     return "%s/../%s" % (first, last)
 
-
-
 class GerritThread(threading.Thread):
-    def __init__(self, config, irc):
+    def __init__(self, config):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.config = config
-        self.irc = irc
 
     def run(self):
         while True:
@@ -95,9 +101,9 @@ class GerritThread(threading.Thread):
                 try:
                     event = simplejson.loads(line)
                     if event["type"] == "comment-added":
-                        self.irc.comment_added(event)
+                        comment_added(event)
                     elif event["type"] == "change-merged":
-                        self.irc.change_merged(event)
+                        change_merged(event)
                     else:
                         pass
                 except ValueError:
@@ -106,101 +112,37 @@ class GerritThread(threading.Thread):
         except Exception, e:
             print self, "unexpected", e
 
+def change_merged(event):
+    change = event["change"]
 
+    branch = change["branch"]
+    if branch in branch_ignore: return
 
-class IrcClient(irclib.SimpleIRCClient):
+    project = re.compile(r'^platform/').sub("", change["project"])
+    owner = re.compile(r'@.+').sub("", change["owner"]["email"])
+    subject = change["subject"]
+    link = config.get(GENERAL, "shortlink") % (change["id"][:9])
+
+    project = shorten_project(project)
+    branch_color = branch_colors.get(branch, color(GREY))
+
+    msg_branch = branch_color + branch + color(GREY)
+    msg_project = color(TEAL,bold=True) + project + color(GREY)
+    msg_owner = color(TEAL) + owner + color(GREY)
+    msg_subject = color() + subject + color(GREY)
+    msg_link = color(NAVY, underline=True) + link + color(GREY)
+
+    message = "%s | %s | %s > %s %s" % (msg_branch, msg_project, msg_owner, msg_subject, msg_link)
+    os.system('./pipebot/say {0}'.format(message))
+
+def comment_added(event):
     pass
 
 
-class IrcThread(threading.Thread):
-    def __init__(self, config):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.config = config
-
-        self.branch_ignore = []
-        self.branch_colors = {}
-        for name, value in config.items(BRANCHES):
-            if value == "IGNORE":
-                self.branch_ignore.append(name)
-            else:
-                self.branch_colors[name] = color(globals()[value])
-
-    def run(self):
-        host = self.config.get(IRC, "host")
-        port = self.config.getint(IRC, "port")
-        nick = self.config.get(IRC, "nick")
-
-        print self, "connecting to", host
-        self.client = IrcClient()
-        self.client.connect(host, port, nick, username=nick, ircname=nick)
-        self.client.start()
-
-    def finish_setup(self):
-        nick = self.config.get(IRC, "nick")
-        mode = self.config.get(IRC, "mode")
-        channel = self.config.get(IRC, "channel")
-        key = self.config.get(IRC, "key")
-        nickpass = self.config.get(IRC, "nickpass")
-
-        self.client.connection.privmsg("NickServ", "IDENTIFY %s" % (nickpass))
-        self.client.connection.mode(nick, mode)
-        time.sleep(2)
-        self.client.connection.join(channel, key)
-
-    def _topic(self, topic):
-        channel = self.config.get(IRC, "channel")
-        self.client.connection.topic(channel, topic)
-
-    def _privmsg(self, msg):
-        channel = self.config.get(IRC, "channel")
-        self.client.connection.privmsg(channel, msg)
-
-    def change_merged(self, event):
-        change = event["change"]
-
-        branch = change["branch"]
-        if branch in self.branch_ignore: return
-
-        project = re.compile(r'^platform/').sub("", change["project"])
-        owner = re.compile(r'@.+').sub("", change["owner"]["email"])
-        subject = change["subject"]
-        link = self.config.get(GENERAL, "shortlink") % (change["id"][:9])
-
-        project = shorten_project(project)
-        branch_color = self.branch_colors.get(branch, color(GREY))
-
-        msg_branch = branch_color + branch + color(GREY)
-        msg_project = color(TEAL,bold=True) + project + color(GREY)
-        msg_owner = color(TEAL) + owner + color(GREY)
-        msg_subject = color() + subject + color(GREY)
-        msg_link = color(NAVY, underline=True) + link + color(GREY)
-
-        message = "%s | %s | %s > %s %s" % (msg_branch, msg_project, msg_owner, msg_subject, msg_link)
-        self._privmsg(message)
-
-    def comment_added(self, event):
-        pass
-
-
-
-irc = IrcThread(config); irc.start()
-
-# sleep before joining to work around unrealircd bug
-time.sleep(2)
-irc.finish_setup()
-
-# sleep before spinning up threads to wait for chanserv
-time.sleep(5)
-
-gerrit = GerritThread(config, irc); gerrit.start()
-
-
+gerrit = GerritThread(config); gerrit.start()
 
 while True:
     try:
         line = sys.stdin.readline()
     except KeyboardInterrupt:
         break
-
-
