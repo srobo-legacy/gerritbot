@@ -138,6 +138,9 @@ def change_merged(event):
 def comment_added(event):
     pass
 
+def patch_created(event):
+    pass
+
 if __name__ == '__main__':
     gerrit = GerritThread(config); gerrit.start()
 
