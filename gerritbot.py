@@ -25,7 +25,7 @@ import socket, paramiko
 import threading, time, random
 import simplejson
 import irclib
-
+import subprocess
 
 # config file section titles
 GERRIT = "GerritServer"
@@ -133,7 +133,7 @@ def change_merged(event):
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
     message = "%s | %s | %s > %s %s" % (msg_branch, msg_project, msg_owner, msg_subject, msg_link)
-    os.system('./pipebot/say {0}'.format(message))
+    subprocess.call(['./pipebot/say', message])
 
 def comment_added(event):
     pass
