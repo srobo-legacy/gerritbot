@@ -207,13 +207,10 @@ def patchset_created(event):
 
     project = project_from_change(change)
     uploader = username_from_person(event["uploader"])
-    owner = username_from_person(change["owner"])
     subject = change["subject"]
     link = link_from_change(change)
 
     msg_owner = color(GREEN) + uploader + color()
-    if uploader != owner:
-        msg_owner += ' (for ' + color(GREEN) + owner + color() + ')'
     msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
