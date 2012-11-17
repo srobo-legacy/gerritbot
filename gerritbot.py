@@ -141,6 +141,17 @@ def get_branch_color(branch):
     branch_color = branch_colors.get(branch, color(NAVY))
     return branch_color
 
+def build_repo_branch(project, branch):
+    project = shorten_project(project)
+    branch_color = get_branch_color(branch)
+
+    msg_branch = branch_color + branch + color(GREY)
+    msg_project = color(TEAL,bold=True) + project + color(GREY)
+
+    msg_project_branch = "%s(%s)" % (msg_project, msg_branch)
+
+    return msg_project_branch
+
 def change_merged(event):
     change = event["change"]
 
@@ -152,16 +163,12 @@ def change_merged(event):
     subject = change["subject"]
     link = link_from_change(change)
 
-    project = shorten_project(project)
-    branch_color = get_branch_color(branch)
-
-    msg_branch = branch_color + branch + color(GREY)
-    msg_project = color(TEAL,bold=True) + project + color(GREY)
     msg_owner = color(GREEN) + owner + "'s" + color()
+    msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
-    message = "Applied %s change on %s(%s) : %s %s" % (msg_owner, msg_project, msg_branch, msg_subject, msg_link)
+    message = "Applied %s change on %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
     subprocess.call(['./pipebot/say', message])
 
 def comment_added(event):
@@ -177,16 +184,12 @@ def comment_added(event):
     subject = change["subject"]
     link = link_from_change(change)
 
-    project = shorten_project(project)
-    branch_color = get_branch_color(branch)
-
     msg_author = color(GREEN) + author + color()
-    msg_project = color(TEAL,bold=True) + project + color(GREY)
-    msg_branch = branch_color + branch + color(GREY)
+    msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
-    message = "%s reviewed %s(%s) : %s %s" % (msg_author, msg_project, msg_branch, msg_subject, msg_link)
+    message = "%s reviewed %s : %s %s" % (msg_author, msg_project_branch, msg_subject, msg_link)
     subprocess.call(['./pipebot/say', message])
 
 def patchset_created(event):
@@ -201,18 +204,14 @@ def patchset_created(event):
     subject = change["subject"]
     link = link_from_change(change)
 
-    project = shorten_project(project)
-    branch_color = get_branch_color(branch)
-
     msg_owner = color(GREEN) + uploader + color()
     if uploader != owner:
         msg_owner += ' (for ' + color(GREEN) + owner + color() + ')'
-    msg_project = color(TEAL,bold=True) + project + color(GREY)
-    msg_branch = branch_color + branch + color(GREY)
+    msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
-    message = "%s submitted %s(%s) : %s %s" % (msg_owner, msg_project, msg_branch, msg_subject, msg_link)
+    message = "%s submitted %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
     subprocess.call(['./pipebot/say', message])
 
 if __name__ == '__main__':
