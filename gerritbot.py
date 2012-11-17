@@ -130,7 +130,7 @@ def change_merged(event):
 
     msg_branch = branch_color + branch + color(GREY)
     msg_project = color(TEAL,bold=True) + project + color(GREY)
-    msg_owner = color(TEAL) + owner + color(GREY)
+    msg_owner = color(GREEN) + owner + color(GREY)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
@@ -153,7 +153,7 @@ def comment_added(event):
     project = shorten_project(project)
     branch_color = branch_colors.get(branch, color(GREY))
 
-    msg_author = color(TEAL) + author + color(BLACK)
+    msg_author = color(GREEN) + author + color(BLACK)
     msg_project = color(TEAL,bold=True) + project + color(GREY)
     msg_branch = branch_color + branch + color(GREY)
     msg_subject = color() + subject + color(GREY)
