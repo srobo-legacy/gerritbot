@@ -209,13 +209,15 @@ def patchset_created(event):
     uploader = username_from_person(event["uploader"])
     subject = change["subject"]
     link = link_from_change(change)
+    number = event['patchSet']['number']
 
     msg_owner = color(GREEN) + uploader + color()
     msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
+    msg_verb = 'updated' if number > 1  else 'submitted'
 
-    message = "%s submitted %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
+    message = "%s %s %s : %s %s" % (msg_owner, msg_verb, msg_project_branch, msg_subject, msg_link)
     subprocess.call(['./pipebot/say', message])
 
 def ref_updated(event):
