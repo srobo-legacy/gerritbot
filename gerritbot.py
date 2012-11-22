@@ -231,7 +231,7 @@ def ref_updated(event):
 
     project = project_from_change(updated_ref)
     submitter = username_from_person(event["submitter"])
-    link = "http://git.srobo.org/%s.git" % project
+    link = "http://srobo.org/cgit/%s.git" % project
 
     msg_project_branch = build_repo_branch(project, branch) + color()
     msg_owner = color(GREEN) + submitter + color()
