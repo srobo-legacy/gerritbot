@@ -209,7 +209,7 @@ def patchset_created(event):
     uploader = username_from_person(event["uploader"])
     subject = change["subject"]
     link = link_from_change(change)
-    number = event['patchSet']['number']
+    number = int(event['patchSet']['number'])
 
     msg_owner = color(GREEN) + uploader + color()
     msg_project_branch = build_repo_branch(project, branch)
