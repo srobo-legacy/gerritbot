@@ -146,6 +146,10 @@ def link_from_change(change):
     link = config.get(GENERAL, "shortlink") % (change["number"])
     return link
 
+def link_from_trac_id(trac_id):
+    link = config.get(GENERAL, "traclink") % str(trac_id)
+    return link
+
 def get_branch_color(branch):
     branch_color = branch_colors.get(branch, color(NAVY))
     return branch_color
@@ -160,6 +164,13 @@ def build_repo_branch(project, branch):
     msg_project_branch = "%s(%s)" % (msg_project, msg_branch)
 
     return msg_project_branch
+
+def extract_trac_id(message):
+    match = re.match('^Fix #(\d+):', message)
+    if match is None:
+        return None
+    number = match.groups(1)[0]
+    return number
 
 def change_abandoned(event):
     change = event["change"]
@@ -235,6 +246,7 @@ def patchset_created(event):
     uploader = username_from_person(event["uploader"])
     subject = change["subject"]
     link = link_from_change(change)
+    trac_id = extract_trac_id(change['subject'])
     number = int(event['patchSet']['number'])
 
     msg_owner = color(GREEN) + uploader + color()
@@ -244,6 +256,12 @@ def patchset_created(event):
     msg_verb = 'updated' if number > 1  else 'submitted'
 
     message = "%s %s %s : %s %s" % (msg_owner, msg_verb, msg_project_branch, msg_subject, msg_link)
+
+    if trac_id is not None:
+        trac_link = link_from_trac_id(trac_id)
+        msg_trac_link = color(NAVY, underline=True) + trac_link + color(GREY)
+        message += " : %s" % (msg_trac_link)
+
     subprocess.call(['./pipebot/say', message])
 
 def ref_updated(event):
