@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 '''
     Copyright 2010, The Android Open Source Project
@@ -18,14 +18,15 @@
 
 # bridge script to irc channel from gerrit livestream
 # written by jeff sharkey and kenny root
-
-
-import re, os, sys, ConfigParser
-import socket, paramiko
-import threading, time, random
-import simplejson
-import irclib
+from configparser import ConfigParser
+import json
+import re
 import subprocess
+import sys
+import threading
+from time import sleep
+
+import gerrit_stream
 
 # config file section titles
 GERRIT = "GerritServer"
@@ -33,26 +34,32 @@ IRC = "IrcServer"
 BRANCHES = "Branches"
 GENERAL = "General"
 
-config = ConfigParser.ConfigParser()
-config.read("gerritbot.conf")
+CONFIG = ConfigParser()
+CONFIG.read("gerritbot.conf")
 
 
-NONE, BLACK, NAVY, GREEN, RED, BROWN, PURPLE, OLIVE, YELLOW, LIME, TEAL, AQUA, BLUE, PINK, GREY, SILVER, WHITE = range(17)
+(NONE, BLACK, NAVY, GREEN, RED, BROWN, PURPLE, OLIVE, YELLOW,
+ LIME, TEAL, AQUA, BLUE, PINK, GREY, SILVER, WHITE) = range(17)
+
 
 def color(fg=None, bg=None, bold=False, underline=False):
     # generate sequence for irc formatting
     result = "\x0f"
-    if not fg is None: result += "\x03%d" % (fg)
-    if not bg is None: result += ",%s" % (bg)
-    if bold: result += "\x02"
-    if underline: result += "\x1f"
+    if not fg is None:
+        result += "\x03{0}".format(fg)
+    if not bg is None:
+        result += ",{0}".format(bg)
+    if bold:
+        result += "\x02"
+    if underline:
+        result += "\x1f"
     return result
 
-branch_colors = {}
-branch_ignore = []
-for name, value in config.items(BRANCHES):
+BRANCH_COLORS = {}
+BRANCH_IGNORE = []
+for name, value in CONFIG.items(BRANCHES):
     if value == "IGNORE":
-        branch_ignore.append(name)
+        BRANCH_IGNORE.append(name)
     else:
         bold = False
         underline = False
@@ -63,89 +70,81 @@ for name, value in config.items(BRANCHES):
                 bold = True
             if 'UNDERLINE' in mods:
                 underline = True
-        branch_colors[name] = color(globals()[colour], bold=bold, underline=underline)
+        BRANCH_COLORS[name] = color(globals()[colour],  # ouch!
+                                    bold=bold, underline=underline)
 
+
+PROJECT_INNER_RE = re.compile('^([^/]+)/(.+?)/([^/]+)$')
 
 def shorten_project(project):
     # shorten long project names by omitting middle
-    reinner = re.compile('^([^/]+)/(.+?)/([^/]+)$')
-    match = reinner.match(project)
-    if match is None: return project
+    match = PROJECT_INNER_RE.match(project)
+    if match is None:
+        return project
 
     first, middle, last = match.groups()
-    if len(middle) < 16: return project
-    return "%s/../%s" % (first, last)
+    if len(middle) < 16:
+        return project
+    return "{0}/../{1}".format(first, last)
 
 def shorten_hash(full_hash):
     if len(full_hash) <= 7:
         return full_hash
     return full_hash[:7]
 
+EVENT_HANDLERS = {}
 def trigger(event):
-    if event["type"] == "comment-added":
-        comment_added(event)
-    elif event["type"] == "change-merged":
-        change_merged(event)
-    elif event["type"] == "patchset-created":
-        patchset_created(event)
-    elif event["type"] == "ref-updated":
-        ref_updated(event)
-    else:
-        pass
+    handler = EVENT_HANDLERS.get(event["type"], lambda x: None)
+    handler(event)
+
+def event_handler(name):
+    def wrap(fn):
+        EVENT_HANDLERS[name] = fn
+        return fn
+    return wrap
 
 class GerritThread(threading.Thread):
     def __init__(self, config):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
+        super().__init__()
+        self.daemon = True
         self.config = config
 
     def run(self):
         while True:
             self.run_internal()
-            print self, "sleeping and wrapping around"
-            time.sleep(5)
+            print(self, "sleeping and wrapping around")
+            sleep(5)
 
     def run_internal(self):
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
         host = self.config.get(GERRIT, "host")
         port = self.config.getint(GERRIT, "port")
         user = self.config.get(GERRIT, "user")
         privkey = self.config.get(GERRIT, "privkey")
 
         try:
-            print self, "connecting to", host
-            client.connect(host, port, user, key_filename=privkey, timeout=60)
-            client.get_transport().set_keepalive(60)
+            print(self, "connecting to", host)
+            stream = gerrit_stream.GerritStream(host, user, port, privkey)
+            for event in stream:
+                trigger(event)
+        except Exception as exception:
+            print(self, "unexpected", exception)
 
-            stdin, stdout, stderr = client.exec_command("gerrit stream-events")
-            for line in stdout:
-                print line
-                try:
-                    event = simplejson.loads(line)
-                    trigger(event)
-                except ValueError:
-                    pass
-            client.close()
-        except Exception, e:
-            print self, "unexpected", e
-
+USERNAME_RE = re.compile(r'@.+')
 def username_from_person(person):
-    username = re.compile(r'@.+').sub("", person["email"])
+    username = USERNAME_RE.sub("", person["email"])
     return username
 
+PROJECT_RE = re.compile(r'^platform/')
 def project_from_change(change):
-    project = re.compile(r'^platform/').sub("", change["project"])
+    project = PROJECT_RE.sub("", change["project"])
     return project
 
 def link_from_change(change):
-    link = config.get(GENERAL, "shortlink") % (change["number"])
+    link = CONFIG.get(GENERAL, "shortlink").format(id=change["number"])
     return link
 
 def get_branch_color(branch):
-    branch_color = branch_colors.get(branch, color(NAVY))
+    branch_color = BRANCH_COLORS.get(branch, color(NAVY))
     return branch_color
 
 def build_repo_branch(project, branch):
@@ -153,17 +152,20 @@ def build_repo_branch(project, branch):
     branch_color = get_branch_color(branch)
 
     msg_branch = branch_color + branch + color(GREY)
-    msg_project = color(TEAL,bold=True) + project + color(GREY)
+    msg_project = color(TEAL, bold=True) + project + color(GREY)
 
-    msg_project_branch = "%s(%s)" % (msg_project, msg_branch)
+    return "{project}({branch})".format(project=msg_project,
+                                        branch=msg_branch)
 
     return msg_project_branch
 
+@event_handler("change-merged")
 def change_merged(event):
     change = event["change"]
 
     branch = change["branch"]
-    if branch in branch_ignore: return
+    if branch in BRANCH_IGNORE:
+        return
 
     project = project_from_change(change)
     owner = username_from_person(change["owner"])
@@ -175,14 +177,20 @@ def change_merged(event):
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
-    message = "Applied %s change on %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
+    MESSAGE_FORMAT = "Applied {owner} change on {project}: {subject} {link}"
+    message = MESSAGE_FORMAT.format(owner=msg_owner,
+                                    project=msg_project_branch,
+                                    subject=msg_subject,
+                                    link=msg_link)
     subprocess.call(['./pipebot/say', message])
 
+@event_handler("comment-added")
 def comment_added(event):
     change = event["change"]
 
     branch = change["branch"]
-    if branch in branch_ignore: return
+    if branch in BRANCH_IGNORE:
+        return
 
     author = event["author"]
 
@@ -196,14 +204,20 @@ def comment_added(event):
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
-    message = "%s reviewed %s : %s %s" % (msg_author, msg_project_branch, msg_subject, msg_link)
+    MESSAGE_FORMAT = "{author} reviewed {project}: {subject} {link}"
+    message = MESSAGE_FORMAT.format(author=msg_author,
+                                    project=msg_project_branch,
+                                    subject=msg_subject,
+                                    link=msg_link)
     subprocess.call(['./pipebot/say', message])
 
+@event_handler("patchset-created")
 def patchset_created(event):
     change = event["change"]
 
     branch = change["branch"]
-    if branch in branch_ignore: return
+    if branch in BRANCH_IGNORE:
+        return
 
     project = project_from_change(change)
     uploader = username_from_person(event["uploader"])
@@ -215,23 +229,30 @@ def patchset_created(event):
     msg_project_branch = build_repo_branch(project, branch)
     msg_subject = color() + subject + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
-    msg_verb = 'updated' if number > 1  else 'submitted'
+    msg_verb = 'updated' if number > 1 else 'submitted'
 
-    message = "%s %s %s : %s %s" % (msg_owner, msg_verb, msg_project_branch, msg_subject, msg_link)
+    MESSAGE_FORMAT = "{owner} {verb} {project}: {subject} {link}"
+    message = MESSAGE_FORMAT.format(owner=msg_owner,
+                                    verb=msg_verb,
+                                    project=msg_project_branch,
+                                    subject=msg_project,
+                                    link=msg_link)
     subprocess.call(['./pipebot/say', message])
 
+@event_handler("ref-updated")
 def ref_updated(event):
     updated_ref = event["refUpdate"]
 
     branch = updated_ref["refName"]
-    if branch in branch_ignore: return
+    if branch in BRANCH_IGNORE:
+        return
 
     to_hash = shorten_hash(updated_ref['newRev'])
     from_hash = shorten_hash(updated_ref['oldRev'])
 
     project = project_from_change(updated_ref)
     submitter = username_from_person(event["submitter"])
-    link = "http://git.srobo.org/%s.git" % project
+    link = "http://git.srobo.org/{project}.git".format(project=project)
 
     msg_project_branch = build_repo_branch(project, branch) + color()
     msg_owner = color(GREEN) + submitter + color()
@@ -239,14 +260,23 @@ def ref_updated(event):
     msg_new_ref = color(bold=True) + to_hash + color(GREY)
     msg_link = color(NAVY, underline=True) + link + color()
 
-    message = "%s updated %s from %s to %s : %s" % (msg_owner, msg_project_branch, msg_old_ref, msg_new_ref, msg_link)
-    subprocess.call(['./pipebot/say', message])
+    MESSAGE_FORMAT = "{owner} updated {project} from {old} to {new}: {link}"
+    message = MESSAGE_FORMAT.format(owner=msg_owner,
+                                    project=msg_project_branch,
+                                    old=msg_old_ref,
+                                    new=msg_new_ref,
+                                    link=msg_link)
+    subprocess.check_call(['./pipebot/say', message])
 
-if __name__ == '__main__':
-    gerrit = GerritThread(config); gerrit.start()
+def main():
+    gerrit = GerritThread(CONFIG)
+    gerrit.start()
 
     while True:
         try:
             line = sys.stdin.readline()
         except KeyboardInterrupt:
             break
+
+if __name__ == '__main__':
+    main()
