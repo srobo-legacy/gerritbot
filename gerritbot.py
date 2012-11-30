@@ -82,7 +82,9 @@ def shorten_hash(full_hash):
     return full_hash[:7]
 
 def trigger(event):
-    if event["type"] == "comment-added":
+    if event["type"] == "change-abandoned":
+        change_abandoned(event)
+    elif event["type"] == "comment-added":
         comment_added(event)
     elif event["type"] == "change-merged":
         change_merged(event)
@@ -158,6 +160,30 @@ def build_repo_branch(project, branch):
     msg_project_branch = "%s(%s)" % (msg_project, msg_branch)
 
     return msg_project_branch
+
+def change_abandoned(event):
+    change = event["change"]
+
+    branch = change["branch"]
+    if branch in branch_ignore: return
+
+    project = project_from_change(change)
+    owner = username_from_person(change["owner"])
+    abandoner = username_from_person(event["abandoner"])
+    subject = change["subject"]
+    link = link_from_change(change)
+
+    if owner != abandoner:
+        msg_owner = color(GREEN) + owner + "'s" + color()
+    else:
+        msg_owner = "their"
+    msg_abandoner = color(GREEN) + abandoner + color()
+    msg_project_branch = build_repo_branch(project, branch)
+    msg_subject = color() + subject + color(GREY)
+    msg_link = color(NAVY, underline=True) + link + color(GREY)
+
+    message = "%s abandoned %s change on %s : %s %s" % (msg_abandoner, msg_owner, msg_project_branch, msg_subject, msg_link)
+    subprocess.call(['./pipebot/say', message])
 
 def change_merged(event):
     change = event["change"]
