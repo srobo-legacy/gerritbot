@@ -41,7 +41,7 @@ def trigger(event):
     elif event_type == "ref-updated":
         ref_updated(event)
     else:
-        pass
+        print "Unhandled event type '{0}'.".format(event_type)
 
 
 def change_abandoned(event):
