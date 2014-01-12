@@ -102,10 +102,11 @@ def trigger(event):
         pass
 
 class GerritThread(threading.Thread):
-    def __init__(self, config):
+    def __init__(self, config, event_handler):
         threading.Thread.__init__(self)
         self.setDaemon(True)
         self.config = config
+        self.handler = event_handler
 
     def run(self):
         while True:
@@ -133,7 +134,7 @@ class GerritThread(threading.Thread):
                 print line
                 try:
                     event = simplejson.loads(line)
-                    trigger(event)
+                    self.handler(event)
                 except ValueError:
                     pass
             client.close()
@@ -293,7 +294,7 @@ def ref_updated(event):
     emit_message(message)
 
 if __name__ == '__main__':
-    gerrit = GerritThread(config); gerrit.start()
+    gerrit = GerritThread(config, trigger); gerrit.start()
 
     while True:
         try:
