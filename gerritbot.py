@@ -27,10 +27,11 @@ import os
 import re
 import simplejson
 import socket
-import subprocess
 import sys
 import threading
 import time
+
+from pipebot import say as emit_message
 
 # config file section titles
 GERRIT = "GerritServer"
@@ -199,7 +200,7 @@ def change_abandoned(event):
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
     message = "%s abandoned %s change on %s : %s %s" % (msg_abandoner, msg_owner, msg_project_branch, msg_subject, msg_link)
-    subprocess.call(['./pipebot/say', message])
+    emit_message(message)
 
 def change_merged(event):
     change = event["change"]
@@ -218,7 +219,7 @@ def change_merged(event):
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
     message = "Applied %s change on %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
-    subprocess.call(['./pipebot/say', message])
+    emit_message(message)
 
 def comment_added(event):
     change = event["change"]
@@ -239,7 +240,7 @@ def comment_added(event):
     msg_link = color(NAVY, underline=True) + link + color(GREY)
 
     message = "%s reviewed %s : %s %s" % (msg_author, msg_project_branch, msg_subject, msg_link)
-    subprocess.call(['./pipebot/say', message])
+    emit_message(message)
 
 def patchset_created(event):
     change = event["change"]
@@ -267,7 +268,7 @@ def patchset_created(event):
         msg_trac_link = color(NAVY, underline=True) + trac_link + color(GREY)
         message += " : %s" % (msg_trac_link)
 
-    subprocess.call(['./pipebot/say', message])
+    emit_message(message)
 
 def ref_updated(event):
     updated_ref = event["refUpdate"]
@@ -289,7 +290,7 @@ def ref_updated(event):
     msg_link = color(NAVY, underline=True) + link + color()
 
     message = "%s updated %s from %s to %s : %s" % (msg_owner, msg_project_branch, msg_old_ref, msg_new_ref, msg_link)
-    subprocess.call(['./pipebot/say', message])
+    emit_message(message)
 
 if __name__ == '__main__':
     gerrit = GerritThread(config); gerrit.start()
