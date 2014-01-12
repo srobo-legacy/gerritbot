@@ -24,7 +24,6 @@ import re, os, sys, ConfigParser
 import socket, paramiko
 import threading, time, random
 import simplejson
-import irclib
 import subprocess
 
 # config file section titles
