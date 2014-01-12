@@ -130,6 +130,8 @@ class GerritThread(threading.Thread):
                     trigger(event)
                 except ValueError:
                     pass
+            for line in stderr:
+                print self, "error:", line,
             client.close()
         except Exception, e:
             print self, "unexpected", e
