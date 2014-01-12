@@ -35,7 +35,6 @@ from pipebot import say as emit_message
 
 # config file section titles
 GERRIT = "GerritServer"
-IRC = "IrcServer"
 BRANCHES = "Branches"
 GENERAL = "General"
 
