@@ -45,7 +45,7 @@ def last_message():
 
 # override the output function to our own
 # TODO: re-architect things to avoid this?
-gerritbot.emit_message = store_message
+gerritbot.irc_handlers.emit_message = store_message
 
 def text_only(message):
     # strip out the colour characters
