@@ -29,15 +29,16 @@ from utils import *
 
 
 def trigger(event):
-    if event["type"] == "change-abandoned":
+    event_type = event['type']
+    if event_type == "change-abandoned":
         change_abandoned(event)
-    elif event["type"] == "comment-added":
+    elif event_type == "comment-added":
         comment_added(event)
-    elif event["type"] == "change-merged":
+    elif event_type == "change-merged":
         change_merged(event)
-    elif event["type"] == "patchset-created":
+    elif event_type == "patchset-created":
         patchset_created(event)
-    elif event["type"] == "ref-updated":
+    elif event_type == "ref-updated":
         ref_updated(event)
     else:
         pass
