@@ -18,6 +18,7 @@
 
 # bridge script to irc channel from gerrit livestream
 # written by jeff sharkey and kenny root
+# with modifications by jeremy morse, peter law and richard barlow
 
 
 import re, os, sys, ConfigParser
