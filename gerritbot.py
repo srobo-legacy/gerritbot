@@ -21,11 +21,16 @@
 # with modifications by jeremy morse, peter law and richard barlow
 
 
-import re, os, sys, ConfigParser
-import socket, paramiko
-import threading, time, random
+import ConfigParser
+import paramiko
+import os
+import re
 import simplejson
+import socket
 import subprocess
+import sys
+import threading
+import time
 
 # config file section titles
 GERRIT = "GerritServer"
