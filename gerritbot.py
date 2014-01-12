@@ -22,19 +22,13 @@
 
 
 import ConfigParser
-import paramiko
-import os
 import re
-import simplejson
-import socket
 import sys
-import threading
-import time
 
+from gerritthread import GerritThread
 from pipebot import say as emit_message
 
 # config file section titles
-GERRIT = "GerritServer"
 BRANCHES = "Branches"
 GENERAL = "General"
 
@@ -100,45 +94,6 @@ def trigger(event):
     else:
         pass
 
-class GerritThread(threading.Thread):
-    def __init__(self, config, event_handler):
-        threading.Thread.__init__(self)
-        self.setDaemon(True)
-        self.config = config
-        self.handler = event_handler
-
-    def run(self):
-        while True:
-            self.run_internal()
-            print self, "sleeping and wrapping around"
-            time.sleep(5)
-
-    def run_internal(self):
-        client = paramiko.SSHClient()
-        client.load_system_host_keys()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        host = self.config.get(GERRIT, "host")
-        port = self.config.getint(GERRIT, "port")
-        user = self.config.get(GERRIT, "user")
-        privkey = self.config.get(GERRIT, "privkey")
-
-        try:
-            print self, "connecting to", host
-            client.connect(host, port, user, key_filename=privkey, timeout=60)
-            client.get_transport().set_keepalive(60)
-
-            stdin, stdout, stderr = client.exec_command("gerrit stream-events")
-            for line in stdout:
-                print line
-                try:
-                    event = simplejson.loads(line)
-                    self.handler(event)
-                except ValueError:
-                    pass
-            client.close()
-        except Exception, e:
-            print self, "unexpected", e
 
 def username_from_person(person):
     username = re.compile(r'@.+').sub("", person["email"])
