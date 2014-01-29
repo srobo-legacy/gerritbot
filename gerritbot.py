@@ -24,7 +24,6 @@
 import ConfigParser
 import paramiko
 import os
-import random
 import re
 import simplejson
 import socket
