@@ -1,7 +1,5 @@
 
 from nose import with_setup
-import string
-import unidecode
 
 import helpers
 

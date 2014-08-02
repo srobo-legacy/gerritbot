@@ -1,13 +1,7 @@
 
-from nose import with_setup
-import string
-import unidecode
-
-import helpers
 from routing import trigger, register_for
 
 def test_no_handlers():
-    events = []
     event_name = 'test-no-handlers'
 
     test_event = {'type': event_name}

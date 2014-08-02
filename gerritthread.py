@@ -21,7 +21,6 @@
 
 import paramiko
 import simplejson
-import socket
 import threading
 import time
 
