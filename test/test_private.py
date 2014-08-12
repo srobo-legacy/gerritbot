@@ -6,5 +6,8 @@ import helpers
 @with_setup(helpers.clear_messages, helpers.clear_messages)
 def test_private():
     helpers.trigger_from_file('private-push.json')
-    assert not helpers.messages, 'private commit was published'
 
+    message = helpers.last_message()
+    message = helpers.text_only(message)
+
+    assert "SECRET" not in message, 'private commit message was published'

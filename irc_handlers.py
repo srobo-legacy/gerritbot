@@ -23,9 +23,6 @@ from routing import register_for
 from pipebot import say as emit_message
 from utils import *
 
-def is_private(project):
-    return project.startswith('priv/')
-
 @register_for('change-abandoned')
 def change_abandoned(event):
     change = event["change"]
@@ -33,9 +30,6 @@ def change_abandoned(event):
     branch = change["branch"]
     if branch in branch_ignore: return
 
-    project = project_from_change(change)
-    if is_private(project):
-        return
     owner = username_from_person(change["owner"])
     abandoner = username_from_person(event["abandoner"])
 
@@ -56,9 +50,6 @@ def change_merged(event):
     branch = change["branch"]
     if branch in branch_ignore: return
 
-    project = project_from_change(change)
-    if is_private(project):
-        return
     owner = username_from_person(change["owner"])
 
     msg_owner = color(GREEN) + owner + "'s" + color()
@@ -75,10 +66,6 @@ def comment_added(event):
     if branch in branch_ignore: return
 
     author = event["author"]
-
-    project = project_from_change(change)
-    if is_private(project):
-        return
     author = username_from_person(author)
 
     msg_author = color(GREEN) + author + color()
@@ -94,9 +81,6 @@ def patchset_created(event):
     branch = change["branch"]
     if branch in branch_ignore: return
 
-    project = project_from_change(change)
-    if is_private(project):
-        return
     uploader = username_from_person(event["uploader"])
     trac_id = extract_trac_id(change['subject'])
     number = int(event['patchSet']['number'])
@@ -125,8 +109,6 @@ def ref_updated(event):
     from_hash = shorten_hash(updated_ref['oldRev'])
 
     project = project_from_change(updated_ref)
-    if is_private(project):
-        return
     submitter = username_from_person(event["submitter"])
     link = "http://srobo.org/cgit/%s.git" % project
 
