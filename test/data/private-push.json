@@ -1,0 +1,35 @@
+{
+    "change": {
+        "branch": "master", 
+        "id": "I02d8cb070835fa80543e48f2699e5d37110359c1", 
+        "number": "32", 
+        "owner": {
+            "email": "plaw@studentrobotics.org", 
+            "name": "Peter Law", 
+            "username": "plaw"
+        }, 
+        "project": "priv/test", 
+        "subject": "SECRET CHEEEEEESE", 
+        "url": "https://www.studentrobotics.org/gerrit/32"
+    }, 
+    "patchSet": {
+        "createdOn": 1353128276, 
+        "number": "1", 
+        "parents": [
+            "2b2f180c6591a6532af1a51f8639cb64d0b25d49"
+        ], 
+        "ref": "refs/changes/32/32/1", 
+        "revision": "02d8cb070835fa80543e48f2699e5d37110359c1", 
+        "uploader": {
+            "email": "plaw@studentrobotics.org", 
+            "name": "Peter Law", 
+            "username": "plaw"
+        }
+    }, 
+    "type": "patchset-created", 
+    "uploader": {
+        "email": "plaw@studentrobotics.org", 
+        "name": "Peter Law", 
+        "username": "plaw"
+    }
+}
