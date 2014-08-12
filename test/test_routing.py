@@ -1,8 +1,4 @@
 
-from nose import with_setup
-import string
-import unidecode
-
 import helpers
 from routing import trigger, register_for
 
