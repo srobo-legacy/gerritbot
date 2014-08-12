@@ -1,0 +1,22 @@
+{
+    "abandoner": {
+        "email": "PeterJCLaw@gmail.com", 
+        "name": "Peter Law", 
+        "username": "plaw"
+    }, 
+    "change": {
+        "branch": "master", 
+        "id": "I4bf84e81e9f65538d44ece3f5d11bb2d946303a4", 
+        "number": "155", 
+        "owner": {
+            "email": "PeterJCLaw@gmail.com", 
+            "name": "Peter Law", 
+            "username": "plaw"
+        }, 
+        "project": "test", 
+        "subject": "Remove file to create conflict with Andy's #138.", 
+        "url": "https://www.studentrobotics.org/gerrit/155"
+    }, 
+    "reason": "bees", 
+    "type": "change-abandoned"
+}

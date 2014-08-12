@@ -1,0 +1,14 @@
+{
+    "refUpdate": {
+        "newRev": "6daf656fa3c005db7187db169710816167f27c27",
+        "oldRev": "6b3a9a13275ede0e3f941b549562c5730ae44842",
+        "project": "test/other",
+        "refName": "master"
+    },
+    "submitter": {
+        "email": "PeterJCLaw@gmail.com",
+        "name": "Peter Law",
+        "username": "plaw"
+    },
+    "type": "ref-updated"
+}
