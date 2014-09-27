@@ -128,7 +128,7 @@ def ref_updated(event):
     if is_private(project):
         return
     submitter = username_from_person(event["submitter"])
-    link = "http://srobo.org/cgit/%s.git" % project
+    link = link_from_project(project)
 
     msg_project_branch = build_repo_branch(project, branch) + color()
     msg_owner = color(GREEN) + submitter + color()

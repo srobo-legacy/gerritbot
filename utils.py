@@ -92,6 +92,10 @@ def link_from_change(change):
     link = config.get(GENERAL, "shortlink") % (change["number"])
     return link
 
+def link_from_project(project):
+    link = config.get(GENERAL, "projlink") % (project,)
+    return link
+
 def link_from_trac_id(trac_id):
     link = config.get(GENERAL, "traclink") % str(trac_id)
     return link
