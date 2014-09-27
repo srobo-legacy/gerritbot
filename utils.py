@@ -32,7 +32,7 @@ import re
 BRANCHES = "Branches"
 GENERAL = "General"
 
-config = configparser.ConfigParser()
+config = configparser.RawConfigParser()
 config.read("gerritbot.conf")
 
 NONE, BLACK, NAVY, GREEN, RED, BROWN, PURPLE, OLIVE, YELLOW, LIME, TEAL, AQUA, BLUE, PINK, GREY, SILVER, WHITE = range(17)
