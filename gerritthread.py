@@ -19,6 +19,8 @@
 # written by jeff sharkey and kenny root
 # with modifications by jeremy morse, peter law and richard barlow
 
+from __future__ import print_function
+
 import paramiko
 import simplejson
 import socket
@@ -38,7 +40,7 @@ class GerritThread(threading.Thread):
     def run(self):
         while True:
             self.run_internal()
-            print self, "sleeping and wrapping around"
+            print(self, "sleeping and wrapping around")
             time.sleep(5)
 
     def run_internal(self):
@@ -52,21 +54,21 @@ class GerritThread(threading.Thread):
         privkey = self.config.get(GERRIT, "privkey")
 
         try:
-            print self, "connecting to", host
+            print(self, "connecting to", host)
             client.connect(host, port, user, key_filename=privkey, timeout=60)
             client.get_transport().set_keepalive(60)
 
             stdin, stdout, stderr = client.exec_command("gerrit stream-events")
             for line in stdout:
-                print line
+                print(line)
                 try:
                     event = simplejson.loads(line)
                     self.handler(event)
                 except ValueError:
                     pass
             client.close()
-        except Exception, e:
-            print self, "unexpected", e
+        except Exception as e:
+            print(self, "unexpected", e)
 
 
 def printing_handler(event):
@@ -74,7 +76,7 @@ def printing_handler(event):
     A trivial hadler which just dumps the event object to stdout,
     to show how it looks.
     """
-    print event
+    print(event)
 
 if __name__ == '__main__':
     """
