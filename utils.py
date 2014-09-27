@@ -19,15 +19,20 @@
 # written by jeff sharkey and kenny root
 # with modifications by jeremy morse, peter law and richard barlow
 
+try:
+    # python 2
+    import ConfigParser as configparser
+except ImportError:
+    # python 3
+    import configparser
 
-import ConfigParser
 import re
 
 # config file section titles
 BRANCHES = "Branches"
 GENERAL = "General"
 
-config = ConfigParser.ConfigParser()
+config = configparser.ConfigParser()
 config.read("gerritbot.conf")
 
 NONE, BLACK, NAVY, GREEN, RED, BROWN, PURPLE, OLIVE, YELLOW, LIME, TEAL, AQUA, BLUE, PINK, GREY, SILVER, WHITE = range(17)
