@@ -47,6 +47,13 @@ def last_message():
 # TODO: re-architect things to avoid this?
 gerritbot.irc_handlers.emit_message = store_message
 
+# override config to use the example -- ensures consistency even when
+# the local config has been changed.
+import utils
+example_config = os.path.join(root(), 'gerritbot.example.conf')
+utils.config = utils.configparser.RawConfigParser()
+utils.config.read(example_config)
+
 def text_only(message):
     # strip out the colour characters
     to_remove = ['\x02', '\x0f', '\x1f', '\x032', '\x033', '\x0310', '\x0314']
