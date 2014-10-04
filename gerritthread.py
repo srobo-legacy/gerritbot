@@ -64,7 +64,7 @@ class GerritThread(threading.Thread):
                 try:
                     event = simplejson.loads(line)
                     self.handler(event)
-                except ValueError, KeyError:
+                except (ValueError, KeyError):
                     self.logger.exception("Error handling event '%s'.", line)
             for line in stderr:
                 self.logger.error(line)
