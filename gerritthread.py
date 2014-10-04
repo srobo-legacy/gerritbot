@@ -19,8 +19,7 @@
 # written by jeff sharkey and kenny root
 # with modifications by jeremy morse, peter law and richard barlow
 
-from __future__ import print_function
-
+import logging
 import paramiko
 import simplejson
 import socket
@@ -36,11 +35,12 @@ class GerritThread(threading.Thread):
         self.setDaemon(True)
         self.config = config
         self.handler = event_handler
+        self.logger = logging.getLogger('gerritbot.gerritthread')
 
     def run(self):
         while True:
             self.run_internal()
-            print(self, "sleeping and wrapping around")
+            self.logger.info(self, "Sleeping and wrapping around.")
             time.sleep(5)
 
     def run_internal(self):
@@ -54,21 +54,21 @@ class GerritThread(threading.Thread):
         privkey = self.config.get(GERRIT, "privkey")
 
         try:
-            print(self, "connecting to", host)
+            self.logger.info("Connecting to '%s'.", host)
             client.connect(host, port, user, key_filename=privkey, timeout=60)
             client.get_transport().set_keepalive(60)
 
             stdin, stdout, stderr = client.exec_command("gerrit stream-events")
             for line in stdout:
-                print(line)
+                self.logger.debug(line)
                 try:
                     event = simplejson.loads(line)
                     self.handler(event)
-                except ValueError:
-                    pass
+                except ValueError, KeyError:
+                    self.logger.exception("Error handling event '%s'.", line)
             client.close()
-        except Exception as e:
-            print(self, "unexpected", e)
+        except:
+            self.logger.exception("Unexpected error")
 
 
 def printing_handler(event):

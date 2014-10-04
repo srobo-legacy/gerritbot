@@ -21,6 +21,7 @@
 # with modifications by jeremy morse, peter law and richard barlow
 
 import sys
+import logging
 
 from gerritthread import GerritThread
 from routing import trigger
@@ -30,6 +31,7 @@ from utils import config
 import irc_handlers
 
 if __name__ == '__main__':
+    logging.basicConfig(level=logging.INFO, stream=sys.stdout)
     gerrit = GerritThread(config, trigger); gerrit.start()
 
     while True:
