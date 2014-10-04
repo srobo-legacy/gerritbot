@@ -66,6 +66,8 @@ class GerritThread(threading.Thread):
                     self.handler(event)
                 except ValueError, KeyError:
                     self.logger.exception("Error handling event '%s'.", line)
+            for line in stderr:
+                self.logger.error(line)
             client.close()
         except:
             self.logger.exception("Unexpected error")
