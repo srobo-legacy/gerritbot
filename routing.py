@@ -12,7 +12,5 @@ def trigger(event):
 
 def register_for(event_type):
     def wrapper(handler):
-        if not event_type in _handlers:
-            _handlers[event_type] = []
-        _handlers[event_type].append(handler)
+        _handlers.setdefault(event_type, []).append(handler)
     return wrapper
