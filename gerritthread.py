@@ -32,7 +32,7 @@ GERRIT = "GerritServer"
 
 class GerritThread(threading.Thread):
     def __init__(self, config, event_handler):
-        threading.Thread.__init__(self)
+        super(GerritThread, self).__init__()
         self.setDaemon(True)
         self.config = config
         self.handler = event_handler
