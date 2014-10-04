@@ -3,6 +3,7 @@ from __future__ import print_function
 _handlers = {}
 
 def trigger(event):
+    global _handlers
     event_type = event['type']
     if event_type in _handlers:
         for handler in _handlers[event_type]:
@@ -12,5 +13,6 @@ def trigger(event):
 
 def register_for(event_type):
     def wrapper(handler):
+        global _handlers
         _handlers.setdefault(event_type, []).append(handler)
     return wrapper
