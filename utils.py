@@ -26,6 +26,7 @@ except ImportError:
     # python 3
     import configparser
 
+import os.path
 import re
 
 # config file section titles
@@ -33,7 +34,7 @@ BRANCHES = "Branches"
 GENERAL = "General"
 
 config = configparser.RawConfigParser()
-config.read("gerritbot.conf")
+config.read(os.path.join(os.path.dirname(__file__), "gerritbot.conf"))
 
 NONE, BLACK, NAVY, GREEN, RED, BROWN, PURPLE, OLIVE, YELLOW, LIME, TEAL, AQUA, BLUE, PINK, GREY, SILVER, WHITE = range(17)
 
