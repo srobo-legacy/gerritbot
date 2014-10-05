@@ -11,10 +11,7 @@ def root():
 
 sys.path.insert(0, root())
 
-if sys.version_info[0] < 3:
-    from gerritbot import irc_handlers, routing, utils
-else:
-    import irc_handlers, routing, utils
+import irc_handlers, routing, utils
 
 def assert_exists(file_path):
     assert os.path.exists(file_path), "Path '{0}' must exist!".format(file_path)
