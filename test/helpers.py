@@ -11,7 +11,7 @@ def root():
 
 sys.path.insert(0, root())
 
-import gerritbot
+from gerritbot import gerritbot
 
 def assert_exists(file_path):
     assert os.path.exists(file_path), "Path '{0}' must exist!".format(file_path)
@@ -49,7 +49,10 @@ gerritbot.irc_handlers.emit_message = store_message
 
 # override config to use the example -- ensures consistency even when
 # the local config has been changed.
-import utils
+if sys.version_info[0] < 3:
+    from gerritbot import utils
+else:
+    import utils
 example_config = os.path.join(root(), 'gerritbot.example.conf')
 utils.config = utils.configparser.RawConfigParser()
 utils.config.read(example_config)
