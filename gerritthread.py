@@ -84,10 +84,15 @@ if __name__ == '__main__':
     """
     A dummy main section to show how you might run your script.
     """
-    import ConfigParser
+    try:
+        # Python 2
+        import ConfigParser as configparser
+    except ImportError:
+        # Python 3
+        import configparser
     import sys
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read("gerritbot.conf")
 
     gerrit = GerritThread(config, printing_handler); gerrit.start()
