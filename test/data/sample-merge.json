@@ -1,0 +1,35 @@
+{
+    "change": {
+        "branch": "master", 
+        "id": "Ib808fed7acd8da9a9a1f09088063de9b6c789443", 
+        "number": "45", 
+        "owner": {
+            "email": "PeterJCLaw@gmail.com", 
+            "name": "Peter Law", 
+            "username": "plaw"
+        }, 
+        "project": "gerritbot", 
+        "subject": "Add a dev helper script.", 
+        "url": "https://www.studentrobotics.org/gerrit/45"
+    }, 
+    "patchSet": {
+        "createdOn": 1353169850, 
+        "number": "1", 
+        "parents": [
+            "6cb96b338b23d76de07d7e118eabbcc2a14b3c42"
+        ], 
+        "ref": "refs/changes/45/45/1", 
+        "revision": "b808fed7acd8da9a9a1f09088063de9b6c789443", 
+        "uploader": {
+            "email": "PeterJCLaw@gmail.com", 
+            "name": "Peter Law", 
+            "username": "plaw"
+        }
+    }, 
+    "submitter": {
+        "email": "jmorse@studentrobotics.org", 
+        "name": "Jeremy Morse", 
+        "username": "jmorse"
+    }, 
+    "type": "change-merged"
+}
