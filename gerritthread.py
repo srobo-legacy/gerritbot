@@ -19,6 +19,7 @@
 # written by jeff sharkey and kenny root
 # with modifications by jeremy morse, peter law and richard barlow
 
+import logging
 import paramiko
 import simplejson
 import socket
@@ -30,15 +31,16 @@ GERRIT = "GerritServer"
 
 class GerritThread(threading.Thread):
     def __init__(self, config, event_handler):
-        threading.Thread.__init__(self)
+        super(GerritThread, self).__init__()
         self.setDaemon(True)
         self.config = config
         self.handler = event_handler
+        self.logger = logging.getLogger('gerritbot.gerritthread')
 
     def run(self):
         while True:
             self.run_internal()
-            print self, "sleeping and wrapping around"
+            self.logger.info(self, "Sleeping and wrapping around.")
             time.sleep(5)
 
     def run_internal(self):
@@ -52,21 +54,23 @@ class GerritThread(threading.Thread):
         privkey = self.config.get(GERRIT, "privkey")
 
         try:
-            print self, "connecting to", host
+            self.logger.info("Connecting to '%s'.", host)
             client.connect(host, port, user, key_filename=privkey, timeout=60)
             client.get_transport().set_keepalive(60)
 
             stdin, stdout, stderr = client.exec_command("gerrit stream-events")
             for line in stdout:
-                print line
+                self.logger.debug(line)
                 try:
                     event = simplejson.loads(line)
                     self.handler(event)
-                except ValueError:
-                    pass
+                except (ValueError, KeyError):
+                    self.logger.exception("Error handling event '%s'.", line)
+            for line in stderr:
+                self.logger.error(line)
             client.close()
-        except Exception, e:
-            print self, "unexpected", e
+        except:
+            self.logger.exception("Unexpected error")
 
 
 def printing_handler(event):
@@ -74,16 +78,21 @@ def printing_handler(event):
     A trivial hadler which just dumps the event object to stdout,
     to show how it looks.
     """
-    print event
+    print(event)
 
 if __name__ == '__main__':
     """
     A dummy main section to show how you might run your script.
     """
-    import ConfigParser
+    try:
+        # Python 2
+        import ConfigParser as configparser
+    except ImportError:
+        # Python 3
+        import configparser
     import sys
 
-    config = ConfigParser.ConfigParser()
+    config = configparser.ConfigParser()
     config.read("gerritbot.conf")
 
     gerrit = GerritThread(config, printing_handler); gerrit.start()

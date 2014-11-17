@@ -11,7 +11,7 @@ def root():
 
 sys.path.insert(0, root())
 
-import gerritbot
+import irc_handlers, routing, utils
 
 def assert_exists(file_path):
     assert os.path.exists(file_path), "Path '{0}' must exist!".format(file_path)
@@ -26,7 +26,7 @@ def trigger_from_file(file_name):
 
     assert event is not None, "Failed to load event data from '{0}'.".format(file_path)
 
-    gerritbot.trigger(event)
+    routing.trigger(event)
 
 messages = []
 
@@ -45,7 +45,13 @@ def last_message():
 
 # override the output function to our own
 # TODO: re-architect things to avoid this?
-gerritbot.irc_handlers.emit_message = store_message
+irc_handlers.emit_message = store_message
+
+# override config to use the example -- ensures consistency even when
+# the local config has been changed.
+example_config = os.path.join(root(), 'gerritbot.example.conf')
+utils.config = utils.configparser.RawConfigParser()
+utils.config.read(example_config)
 
 def text_only(message):
     # strip out the colour characters
