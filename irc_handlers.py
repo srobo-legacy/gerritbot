@@ -38,19 +38,15 @@ def change_abandoned(event):
         return
     owner = username_from_person(change["owner"])
     abandoner = username_from_person(event["abandoner"])
-    subject = change["subject"]
-    link = link_from_change(change)
 
     if owner != abandoner:
         msg_owner = color(GREEN) + owner + "'s" + color()
     else:
         msg_owner = "their"
     msg_abandoner = color(GREEN) + abandoner + color()
-    msg_project_branch = build_repo_branch(project, branch)
-    msg_subject = color() + subject + color(GREY)
-    msg_link = color(NAVY, underline=True) + link + color(GREY)
+    msg_description = describe_patchset(change)
 
-    message = "%s abandoned %s change on %s : %s %s" % (msg_abandoner, msg_owner, msg_project_branch, msg_subject, msg_link)
+    message = "%s abandoned %s change on %s" % (msg_abandoner, msg_owner, msg_description)
     emit_message(message)
 
 @register_for('change-merged')
@@ -64,15 +60,11 @@ def change_merged(event):
     if is_private(project):
         return
     owner = username_from_person(change["owner"])
-    subject = change["subject"]
-    link = link_from_change(change)
 
     msg_owner = color(GREEN) + owner + "'s" + color()
-    msg_project_branch = build_repo_branch(project, branch)
-    msg_subject = color() + subject + color(GREY)
-    msg_link = color(NAVY, underline=True) + link + color(GREY)
+    msg_description = describe_patchset(change)
 
-    message = "Applied %s change on %s : %s %s" % (msg_owner, msg_project_branch, msg_subject, msg_link)
+    message = "Applied %s change on %s" % (msg_owner, msg_description)
     emit_message(message)
 
 @register_for('comment-added')
@@ -88,15 +80,11 @@ def comment_added(event):
     if is_private(project):
         return
     author = username_from_person(author)
-    subject = change["subject"]
-    link = link_from_change(change)
 
     msg_author = color(GREEN) + author + color()
-    msg_project_branch = build_repo_branch(project, branch)
-    msg_subject = color() + subject + color(GREY)
-    msg_link = color(NAVY, underline=True) + link + color(GREY)
+    msg_description = describe_patchset(change)
 
-    message = "%s reviewed %s : %s %s" % (msg_author, msg_project_branch, msg_subject, msg_link)
+    message = "%s reviewed %s" % (msg_author, msg_description)
     emit_message(message)
 
 @register_for('patchset-created')
@@ -110,18 +98,14 @@ def patchset_created(event):
     if is_private(project):
         return
     uploader = username_from_person(event["uploader"])
-    subject = change["subject"]
-    link = link_from_change(change)
     trac_id = extract_trac_id(change['subject'])
     number = int(event['patchSet']['number'])
 
     msg_owner = color(GREEN) + uploader + color()
-    msg_project_branch = build_repo_branch(project, branch)
-    msg_subject = color() + subject + color(GREY)
-    msg_link = color(NAVY, underline=True) + link + color(GREY)
+    msg_description = describe_patchset(change)
     msg_verb = 'updated' if number > 1  else 'submitted'
 
-    message = "%s %s %s : %s %s" % (msg_owner, msg_verb, msg_project_branch, msg_subject, msg_link)
+    message = "%s %s %s" % (msg_owner, msg_verb, msg_description)
 
     if trac_id is not None:
         trac_link = link_from_trac_id(trac_id)
