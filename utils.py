@@ -113,6 +113,9 @@ def extract_trac_id(message):
     number = match.groups(1)[0]
     return number
 
+def is_private(project):
+    return project.startswith('priv/')
+
 def describe_patchset(change):
     project = project_from_change(change)
     link = link_from_change(change)
@@ -122,7 +125,10 @@ def describe_patchset(change):
 
     msg_project_branch = build_repo_branch(project, branch)
     msg_link = color(NAVY, underline=True) + link + color(GREY)
-    msg_subject = color() + subject + color(GREY) + ' '
+
+    msg_subject = ''
+    if not is_private(project):
+        msg_subject = color() + subject + color(GREY) + ' '
 
     description = "%s : %s%s" % (msg_project_branch, msg_subject, msg_link)
     return description
