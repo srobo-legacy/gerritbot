@@ -21,7 +21,10 @@
 
 from routing import register_for
 from pipebot import say as emit_message
-from utils import *
+import utils
+from utils import color, GREEN, GREY, NAVY, \
+                  branch_ignore, describe_patchset, shorten_hash, \
+                  username_from_person
 
 @register_for('change-abandoned')
 def change_abandoned(event):
@@ -82,7 +85,7 @@ def patchset_created(event):
     if branch in branch_ignore: return
 
     uploader = username_from_person(event["uploader"])
-    trac_id = extract_trac_id(change['subject'])
+    trac_id = utils.extract_trac_id(change['subject'])
     number = int(event['patchSet']['number'])
 
     msg_owner = color(GREEN) + uploader + color()
@@ -92,7 +95,7 @@ def patchset_created(event):
     message = "%s %s %s" % (msg_owner, msg_verb, msg_description)
 
     if trac_id is not None:
-        trac_link = link_from_trac_id(trac_id)
+        trac_link = utils.link_from_trac_id(trac_id)
         msg_trac_link = color(NAVY, underline=True) + trac_link + color(GREY)
         message += " : %s" % (msg_trac_link)
 
@@ -108,11 +111,11 @@ def ref_updated(event):
     to_hash = shorten_hash(updated_ref['newRev'])
     from_hash = shorten_hash(updated_ref['oldRev'])
 
-    project = project_from_change(updated_ref)
+    project = utils.project_from_change(updated_ref)
     submitter = username_from_person(event["submitter"])
-    link = link_from_project(project)
+    link = utils.link_from_project(project)
 
-    msg_project_branch = build_repo_branch(project, branch) + color()
+    msg_project_branch = utils.build_repo_branch(project, branch) + color()
     msg_owner = color(GREEN) + submitter + color()
     msg_old_ref = color(bold=True) + from_hash + color()
     msg_new_ref = color(bold=True) + to_hash + color(GREY)
