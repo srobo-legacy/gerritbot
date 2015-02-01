@@ -82,7 +82,7 @@ def shorten_hash(full_hash):
 
 
 def username_from_person(person):
-    username = re.compile(r'@.+').sub("", person["email"])
+    username = person["username"]
     return username
 
 def project_from_change(change):
