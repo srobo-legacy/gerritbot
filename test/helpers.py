@@ -43,6 +43,11 @@ def last_message():
     assert len(messages), "No last message to get"
     return messages[-1]
 
+def assert_no_messages():
+    global messages
+    num_messages = len(messages)
+    assert num_messages == 0, "should not be any messages (found {0})".format(num_messages)
+
 # override the output function to our own
 # TODO: re-architect things to avoid this?
 irc_handlers.emit_message = store_message

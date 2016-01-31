@@ -1,0 +1,9 @@
+{
+    "refUpdate": {
+        "newRev": "81d80ecf237b02fc961966d45d0aab150f65856c",
+        "oldRev": "550fa4a03d5e6d299bd1e55e532a2859c58abee5",
+        "project": "server/puppet",
+        "refName": "master"
+    },
+    "type": "ref-updated"
+}

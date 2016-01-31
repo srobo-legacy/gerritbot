@@ -19,3 +19,8 @@ def test_samples():
     yield check, "push-else", "plaw updated cyanide(master) : Bump pyenv for webcam calibration. http://example.com/87"
     yield check, "review", "plaw reviewed test(master) : CHEEEEEESE http://example.com/32"
     yield check, "update-ref", "plaw updated test/other(master) from 6b3a9a1 to 6daf656 : http://example.com/cgit/test/other.git"
+
+@with_setup(helpers.clear_messages, helpers.clear_messages)
+def test_ignore_auto_merge_updates():
+    helpers.trigger_from_file('sample-auto-merge.json')
+    helpers.assert_no_messages()

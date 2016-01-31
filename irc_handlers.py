@@ -103,6 +103,11 @@ def patchset_created(event):
 
 @register_for('ref-updated')
 def ref_updated(event):
+    if "submitter" not in event:
+        # Implies an auto-generated merge-commit was pushed by the system
+        # Ignore since we only care about reporting direct-pushes
+        return
+
     updated_ref = event["refUpdate"]
 
     branch = updated_ref["refName"]
